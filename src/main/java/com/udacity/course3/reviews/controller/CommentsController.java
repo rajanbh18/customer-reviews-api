@@ -2,13 +2,12 @@ package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.entity.Comment;
 import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.exception.CommentsNotFoundException;
 import com.udacity.course3.reviews.repository.CommentRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +45,7 @@ public class CommentsController {
             comment.setReview(optionalReview.get());
             return ResponseEntity.ok(commentRepository.save(comment));
         }else {
-            return ResponseEntity.notFound().build();
+            throw new CommentsNotFoundException();
         }
     }
 
@@ -61,7 +60,10 @@ public class CommentsController {
      */
     @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.GET)
     public List<?> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
-
-        return commentRepository.findAllByReview(new Review(reviewId));
+        List<Comment> commentList = commentRepository.findAllByReview(new Review(reviewId));
+        if (commentList.isEmpty()){
+            throw new CommentsNotFoundException();
+        }
+        return commentList;
     }
 }

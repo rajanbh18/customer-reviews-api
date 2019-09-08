@@ -2,13 +2,12 @@ package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.entity.Product;
 import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.exception.ReviewNotFoundException;
 import com.udacity.course3.reviews.repository.ProductRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +45,7 @@ public class ReviewsController {
             review.setProduct(optionalProduct.get());
             return ResponseEntity.ok(reviewRepository.save(review));
         }else {
-            return ResponseEntity.notFound().build();
+            throw new ReviewNotFoundException();
         }
     }
 
@@ -58,6 +57,10 @@ public class ReviewsController {
      */
     @RequestMapping(value = "/reviews/products/{productId}", method = RequestMethod.GET)
     public ResponseEntity<List<?>> listReviewsForProduct(@PathVariable("productId") Integer productId) {
-        return ResponseEntity.ok(reviewRepository.findAllReviewByProduct(new Product(productId)));
+        List<Review> reviewList = reviewRepository.findAllReviewByProduct(new Product(productId));
+        if (reviewList.isEmpty()){
+            throw new ReviewNotFoundException();
+        }
+        return ResponseEntity.ok(reviewList);
     }
 }

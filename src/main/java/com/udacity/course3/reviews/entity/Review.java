@@ -1,7 +1,7 @@
 package com.udacity.course3.reviews.entity;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "review")
@@ -12,8 +12,8 @@ public class Review {
     @Column(name = "id")
     private Integer id;
 
-    @NotNull(message = "title is required")
     @Column(name = "title")
+    @NotBlank(message = "Title can not be null or blank.")
     private String title;
 
     @Column(name = "review_text")
@@ -24,7 +24,6 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    @NotNull(message = "product id is required.")
     private Product product;
 
     public Review(){
