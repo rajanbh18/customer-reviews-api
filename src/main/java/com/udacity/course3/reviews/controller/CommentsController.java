@@ -3,6 +3,7 @@ package com.udacity.course3.reviews.controller;
 import com.udacity.course3.reviews.entity.Comment;
 import com.udacity.course3.reviews.entity.Review;
 import com.udacity.course3.reviews.exception.CommentsNotFoundException;
+import com.udacity.course3.reviews.exception.ReviewNotFoundException;
 import com.udacity.course3.reviews.repository.CommentRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,21 +42,21 @@ public class CommentsController {
             comment.setReview(optionalReview.get());
             return ResponseEntity.ok(commentRepository.save(comment));
         }else {
-            throw new CommentsNotFoundException();
+            throw new ReviewNotFoundException();
         }
     }
 
     /**
      * List comments for a review.
      *
-     * 2. Check for existence of review.
-     * 3. If review not found, return NOT_FOUND.
-     * 4. If found, return list of comments.
-     *
      * @param reviewId The id of the review.
      */
     @RequestMapping(value = "/reviews/{reviewId}", method = RequestMethod.GET)
     public List<?> listCommentsForReview(@PathVariable("reviewId") Integer reviewId) {
+        Optional<Review> optionalReview = reviewRepository.findById(reviewId);
+        if (!optionalReview.isPresent()){
+            throw new ReviewNotFoundException();
+        }
         List<Comment> commentList = commentRepository.findAllByReview(new Review(reviewId));
         if (commentList.isEmpty()){
             throw new CommentsNotFoundException();
