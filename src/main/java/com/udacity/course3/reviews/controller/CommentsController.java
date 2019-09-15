@@ -2,10 +2,12 @@ package com.udacity.course3.reviews.controller;
 
 import com.udacity.course3.reviews.entity.Comment;
 import com.udacity.course3.reviews.entity.Review;
+import com.udacity.course3.reviews.entity.mongo.ReviewComment;
 import com.udacity.course3.reviews.exception.CommentsNotFoundException;
 import com.udacity.course3.reviews.exception.ReviewNotFoundException;
 import com.udacity.course3.reviews.repository.CommentRepository;
 import com.udacity.course3.reviews.repository.ReviewRepository;
+import com.udacity.course3.reviews.repository.mongo.ReviewsRepositoryCustom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +25,13 @@ public class CommentsController {
 
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
+    private ReviewsRepositoryCustom reviewsRepositoryCustom;
 
     @Autowired
-    public CommentsController(ReviewRepository reviewRepository, CommentRepository commentRepository) {
+    public CommentsController(ReviewRepository reviewRepository, CommentRepository commentRepository, ReviewsRepositoryCustom reviewsRepositoryCustom) {
         this.reviewRepository = reviewRepository;
         this.commentRepository = commentRepository;
+        this.reviewsRepositoryCustom = reviewsRepositoryCustom;
     }
 
     /**
@@ -40,12 +44,26 @@ public class CommentsController {
         Optional<Review> optionalReview = reviewRepository.findById(reviewId);
         if (optionalReview.isPresent()){
             comment.setReview(optionalReview.get());
-            return ResponseEntity.ok(commentRepository.save(comment));
+            Comment savedComment = commentRepository.save(comment);
+
+            Optional<com.udacity.course3.reviews.entity.mongo.Review> review = reviewsRepositoryCustom.findById(reviewId.toString());
+            if (review.isPresent()){
+                review.get().getCommentList().add(getComment(savedComment));
+                reviewsRepositoryCustom.save(review.get());
+            }
+            return ResponseEntity.ok(savedComment);
         }else {
             throw new ReviewNotFoundException();
         }
     }
 
+    private ReviewComment getComment(Comment comment){
+        ReviewComment reviewComment = new ReviewComment();
+        reviewComment.setId(comment.getId().toString());
+        reviewComment.setTitle(comment.getTitle());
+        reviewComment.setCommentText(comment.getCommentText());
+        return reviewComment;
+    }
     /**
      * List comments for a review.
      *
