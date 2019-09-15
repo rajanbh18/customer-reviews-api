@@ -44,8 +44,10 @@ public class ReviewsController {
         Optional<Product> optionalProduct = productRepository.findById(productId);
         if (optionalProduct.isPresent()){
             review.setProduct(optionalProduct.get());
-            reviewsRepositoryCustom.save(getReview(review, optionalProduct));
-            return ResponseEntity.ok(reviewRepository.save(review));
+
+            Review savedReview = reviewRepository.save(review);
+            reviewsRepositoryCustom.save(getReview(savedReview, optionalProduct));
+            return ResponseEntity.ok(savedReview);
         } else {
             throw new ProductNotFoundException();
         }
@@ -58,6 +60,7 @@ public class ReviewsController {
         newReview.setTitle(review.getTitle());
         newReview.setReviewText(review.getReviewText());
         newReview.setRecommended(review.isRecommended());
+        newReview.setId(review.getId().toString());
         return newReview;
     }
 

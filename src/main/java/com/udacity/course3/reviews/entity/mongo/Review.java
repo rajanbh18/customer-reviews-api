@@ -1,16 +1,15 @@
 package com.udacity.course3.reviews.entity.mongo;
 
 import com.udacity.course3.reviews.entity.Product;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Document("review")
 public class Review {
 
-    @Id
     private String id;
 
     @NotBlank(message = "Title can not be null or blank.")
@@ -21,6 +20,8 @@ public class Review {
     private boolean recommended;
 
     private Product product;
+
+    List<ReviewComment> commentList;
 
     public String getId() {
         return id;
@@ -60,5 +61,13 @@ public class Review {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public List<ReviewComment> getCommentList() {
+        return commentList;
+    }
+
+    public void setCommentList(List<ReviewComment> commentList) {
+        this.commentList = commentList;
     }
 }
